@@ -1,0 +1,135 @@
+Here are some challenging SQL tasks that will test your knowledge of various concepts such as complex joins, subqueries, window functions, and data manipulation:
+
+1. **Ranking Top N Records by Group**  
+   - Write a query to find the top 3 highest-paid employees in each department.  
+   - Use `ROW_NUMBER()` or `RANK()` window functions to solve this.
+
+   ```sql
+   SELECT *
+   FROM (
+       SELECT employee_name, department_id, salary,
+              ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY salary DESC) as rank
+       FROM employees
+   ) AS ranked
+   WHERE rank <= 3;
+   ```
+
+2. **Find Consecutive Records**  
+   - Find employees who have had consecutive salary increases over the last 3 years.  
+   - You'll need to self-join the table or use window functions to track consecutive years and compare salaries.
+
+   ```sql
+   SELECT e1.employee_id, e1.salary AS salary_year1, e2.salary AS salary_year2, e3.salary AS salary_year3
+   FROM employees e1
+   JOIN employees e2 ON e1.employee_id = e2.employee_id AND e2.year = e1.year + 1
+   JOIN employees e3 ON e2.employee_id = e3.employee_id AND e3.year = e2.year + 1
+   WHERE e2.salary > e1.salary AND e3.salary > e2.salary;
+   ```
+
+3. **Recursive Query for Hierarchical Data**  
+   - Retrieve a company's organizational hierarchy using a recursive WITH clause (CTE).  
+   - The table will have `employee_id` and `manager_id`. Find the hierarchy starting from the CEO.
+
+   ```sql
+   WITH RECURSIVE hierarchy AS (
+       SELECT employee_id, manager_id, employee_name, 1 AS level
+       FROM employees
+       WHERE manager_id IS NULL -- Starting from the CEO
+       UNION ALL
+       SELECT e.employee_id, e.manager_id, e.employee_name, h.level + 1
+       FROM employees e
+       JOIN hierarchy h ON e.manager_id = h.employee_id
+   )
+   SELECT *
+   FROM hierarchy
+   ORDER BY level;
+   ```
+
+4. **Moving Averages and Rolling Sums**  
+   - Write a query to calculate a 3-month moving average of sales for each product.  
+   - Use window functions like `SUM()` and `AVG()` with `ROWS BETWEEN`.
+
+   ```sql
+   SELECT product_id, month, sales,
+          AVG(sales) OVER (PARTITION BY product_id ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moving_avg
+   FROM sales_data;
+   ```
+
+5. **Identify Gaps in Sequences**  
+   - Suppose you have a table with consecutive invoice numbers. Write a query to identify any gaps in the sequence.  
+   - Use `LEAD()` or `LAG()` functions to compare the current and next row.
+
+   ```sql
+   SELECT invoice_id, next_invoice_id, (next_invoice_id - invoice_id) AS gap
+   FROM (
+       SELECT invoice_id, LEAD(invoice_id) OVER (ORDER BY invoice_id) AS next_invoice_id
+       FROM invoices
+   ) AS subquery
+   WHERE (next_invoice_id - invoice_id) > 1;
+   ```
+
+6. **Pivot Data Without Using Pivot Function**  
+   - Convert a table with year and sales columns into a wide format where each year becomes a column.  
+   - Manually pivot the data using `CASE` statements and aggregation.
+
+   ```sql
+   SELECT product_id,
+          SUM(CASE WHEN year = 2020 THEN sales END) AS sales_2020,
+          SUM(CASE WHEN year = 2021 THEN sales END) AS sales_2021,
+          SUM(CASE WHEN year = 2022 THEN sales END) AS sales_2022
+   FROM sales_data
+   GROUP BY product_id;
+   ```
+
+7. **Finding Duplicate Records Based on Complex Criteria**  
+   - Write a query to find duplicate entries in a table, where a "duplicate" is defined as rows that have the same name and email but different `customer_id`.
+
+   ```sql
+   SELECT name, email, COUNT(*) AS occurrences
+   FROM customers
+   GROUP BY name, email
+   HAVING COUNT(DISTINCT customer_id) > 1;
+   ```
+
+8. **Set Operations: Finding Symmetric Differences**  
+   - Write a query to find the symmetric difference (records present in either of two tables but not both) between two tables `orders_2023` and `orders_2024`.
+
+   ```sql
+   SELECT order_id, order_date
+   FROM orders_2023
+   WHERE order_id NOT IN (SELECT order_id FROM orders_2024)
+   UNION
+   SELECT order_id, order_date
+   FROM orders_2024
+   WHERE order_id NOT IN (SELECT order_id FROM orders_2023);
+   ```
+
+9. **Find the Most Frequent Consecutive Occurrences**  
+   - Given a table with `login_dates`, write a query to find the longest streak of consecutive days a user has logged in.
+
+   ```sql
+   WITH ranked_dates AS (
+       SELECT user_id, login_date, 
+              ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) - 
+              DENSE_RANK() OVER (PARTITION BY user_id ORDER BY login_date) AS streak_id
+       FROM user_logins
+   )
+   SELECT user_id, MIN(login_date) AS start_date, MAX(login_date) AS end_date, COUNT(*) AS streak_length
+   FROM ranked_dates
+   GROUP BY user_id, streak_id
+   ORDER BY streak_length DESC;
+   ```
+
+10. **Data Deduplication with Prioritization**  
+    - You have a table with duplicate records, and you want to delete the duplicates but keep the most recent record based on a timestamp.
+
+    ```sql
+    DELETE FROM students
+    WHERE student_id NOT IN (
+        SELECT MAX(student_id)
+        FROM students
+        GROUP BY name, email
+    );
+    ```
+
+These tasks will challenge you to use advanced SQL features like window functions, recursive queries, and complex aggregations.
