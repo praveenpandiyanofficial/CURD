@@ -1,0 +1,16 @@
+<?php
+// Database connection details
+include 'db.php';
+// Check if tracking key is set
+if (isset($_GET['tracking_key'])) {
+    $tracking_key = $_GET['tracking_key'];
+
+    // Update the email_tracking table to mark the email as opened
+    $stmt = $pdo->prepare("UPDATE email_tracking SET opened = 1, opened_at = NOW() WHERE tracking_key = ?");
+    $stmt->execute([$tracking_key]);
+}
+
+// Output a 1x1 transparent GIF image
+header('Content-Type: image/gif');
+echo base64_decode('R0lGODlhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs=');
+?>
