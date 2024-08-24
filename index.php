@@ -58,6 +58,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $con->close();
 }
 
+// Handle Delete request
+if (isset($_GET['delete_id'])) {
+    $delete_id = $_GET['delete_id'];
+
+    $con = new mysqli("localhost", "root", "", "test");
+    if ($con->connect_error) {
+        die("Connection failed: " . $con->connect_error);
+    }
+
+    // Get the image name to delete it from the folder
+    $getImageQuery = "SELECT image FROM curd WHERE id=?";
+    $stmt = $con->prepare($getImageQuery);
+    $stmt->bind_param('i', $delete_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    if ($row['image'] != '') {
+        unlink('uploads/' . $row['image']);  // Delete the image file
+    }
+    $stmt->close();
+
+    // Delete the record
+    $deleteQuery = $con->prepare("DELETE FROM curd WHERE id=?");
+    $deleteQuery->bind_param('i', $delete_id);
+    if ($deleteQuery->execute()) {
+        echo "Record deleted successfully!";
+    } else {
+        echo "Error deleting record: " . $con->error;
+    }
+
+    $deleteQuery->close();
+    $con->close();
+}
+
 // Fetch record for editing
 if (isset($_GET['id']) && $_SERVER['REQUEST_METHOD'] == 'GET') {
     $id = $_GET['id'];
@@ -76,6 +110,7 @@ if (isset($_GET['id']) && $_SERVER['REQUEST_METHOD'] == 'GET') {
     $con->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -158,7 +193,7 @@ if (isset($_GET['id']) && $_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <td><img style="width: 100px; height: 100px;" src="uploads/<?php echo $row['image'] ?>" alt="img"></td>
                                     <td>
                                         <a class="btn btn-success btn-sm" href="<?php echo $_SERVER['PHP_SELF'] ?>?id=<?php echo $row['id']; ?>">Edit</a>
-                                        <button class="btn btn-danger btn-sm">Delete</button>
+                                        <a class="btn btn-danger btn-sm" href="<?php echo $_SERVER['PHP_SELF'] ?>?delete_id=<?php echo $row['id']; ?>" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
                                     </td>
                                 </tr>
                               <?php } $con->close(); ?>
