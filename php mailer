@@ -1,0 +1,182 @@
+php mailer
+
+<?php
+require 'vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Database connection details
+$host = 'localhost';
+$db = 'bulk_email';
+$user = 'root';
+$pass = '';
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
+}
+
+// Email campaign details
+$campaignName = 'Institute Course Offerings';
+$campaignSubject = 'Explore Our Latest Courses!';
+$campaignBody = '
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .header img {
+            max-width: 100px;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .course {
+            margin-bottom: 20px;
+        }
+        .course h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #333333;
+        }
+        .course p {
+            margin: 0;
+            font-size: 14px;
+            color: #555555;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777777;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="http:///logo.png" alt="Institute Logo">
+            <h1>Our Latest Courses</h1>
+        </div>
+        <div class="content">
+            <div class="course">
+                <h2>Course 1: Web Development</h2>
+                <p>Learn the basics of web development, including HTML, CSS, and JavaScript.</p>
+            </div>
+            <div class="course">
+                <h2>Course 2: Data Science</h2>
+                <p>Explore data analysis, visualization, and machine learning with Python.</p>
+            </div>
+            <div class="course">
+                <h2>Course 3: Cybersecurity</h2>
+                <p>Understand the fundamentals of network security, cryptography, and ethical hacking.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2024 Your Institute. All rights reserved.</p>
+            <p>To unsubscribe, click <a href="#">here</a>.</p>
+        </div>
+    </div>
+</body>
+</html>';
+
+// Insert campaign details into the database
+$stmt = $pdo->prepare("INSERT INTO campaigns (name, subject, body) VALUES (?, ?, ?)");
+$stmt->execute([$campaignName, $campaignSubject, $campaignBody]);
+$campaign_id = $pdo->lastInsertId();
+
+// Recipient email addresses
+$recipients = [
+    'prabamohan12@gmail.com',
+    'prabagaran@iattechnologies.com',
+    'praveenpandiyan@iattechnologies.com',
+    'praveenpandiyanofficial@gmail.com'
+];
+
+$mail = new PHPMailer(true);
+try {
+    $mail->isSMTP();
+    $mail->Host = 'smtp.office365.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'praveenpandiyanofficial@outlook.com';
+    $mail->Password = 'ad@123';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+
+    $mail->setFrom('praveenpandiyanofficial@outlook.com', 'Your Institute');
+    $mail->addReplyTo('praveenpandiyanofficial@gmail.com', 'Your Institute');
+
+    $mail->Subject = $campaignSubject;
+    $mail->isHTML(true);
+    $mail->CharSet = 'UTF-8';
+
+    foreach ($recipients as $email) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo "Skipping invalid email: $email<br>";
+            continue;
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO recipients (campaign_id, email, status) VALUES (?, ?, 'pending')");
+        $stmt->execute([$campaign_id, $email]);
+        $recipient_id = $pdo->lastInsertId();
+
+        $tracking_key = uniqid('track_', true);
+        $stmt = $pdo->prepare("INSERT INTO email_tracking (recipient_id, tracking_key) VALUES (?, ?)");
+        $stmt->execute([$recipient_id, $tracking_key]);
+
+        $mail->clearAddresses();
+        $mail->addAddress($email);
+        $mail->Body = $campaignBody . '<img src="http:///track_open.php?tracking_key=' . $tracking_key . '" width="1" height="1" alt="" />';
+
+        try {
+            if ($mail->send()) {
+                $stmt = $pdo->prepare("UPDATE recipients SET status = 'sent', sent_at = NOW() WHERE id = ?");
+                $stmt->execute([$recipient_id]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE recipients SET status = 'failed' WHERE id = ?");
+                $stmt->execute([$recipient_id]);
+            }
+        } catch (Exception $e) {
+            $stmt = $pdo->prepare("UPDATE recipients SET status = 'failed' WHERE id = ?");
+            $stmt->execute([$recipient_id]);
+        }
+    }
+
+    echo 'Messages have been processed';
+} catch (Exception $e) {
+    echo "Error: {$e->getMessage()}";
+}
+?>
