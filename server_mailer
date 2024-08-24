@@ -1,0 +1,254 @@
+<?php
+// Database connection details
+include 'db.php';
+
+// Email campaign details
+$campaignName = 'IATT Institute Course Offerings';
+$campaignSubject = 'Explore Our Latest Courses!';
+$campaignBody = '
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Lato, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .header img {
+            max-width: 120px;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #333333;
+            margin: 0;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .content p {
+            font-size: 16px;
+            color: #444444;
+            line-height: 1.5;
+        }
+        .content ul {
+            list-style-type: disc;
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .content li {
+            font-size: 16px;
+            color: #555555;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888888;
+        }
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .icon {
+            color: #007BFF;
+            margin-right: 8px;
+        }
+        .icon svg {
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+            fill: currentColor;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .content p, .content li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logoiat.jpg" alt="Institute Logo">
+            <h1><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> Boost Your Tech Career with Our Expert Software Training! <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg></h1>
+        </div>
+        <div class="content">
+            <p><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> Looking to break into the tech industry or advance your skills? Join our cutting-edge software training programs designed for your success!</p>
+            <p><strong><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> What We Offer:</strong></p>
+            <ul>
+                <li>Comprehensive software training courses</li>
+                <li>Real-world, hands-on experience</li>
+                <li>Industry-recognized certifications</li>
+                <li>Personalized career guidance</li>
+            </ul>
+            <img src="https://product.iattechnologies.comemail.jpg" style="max-width: 100%; height: auto; border: 0;">
+            <p><strong><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> Why Choose Us?</strong></p>
+            <ul>
+                <li>Proven track record of 100% placement success</li>
+                <li>Learn from industry experts</li>
+                <li>Flexible learning schedules</li>
+                <li>Competitive pricing and payment plans</li>
+            </ul>
+            <p><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> Get Started Today! Contact us at +91 7338714969 or visit our website <a href="https://www.iattechnologies.com/">https://www.iattechnologies.com/</a> for more information.</p>
+            <p><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.87 2 9l6.91-1.74L12 2z"/></svg> Your Future in Tech Starts Here!</p>
+        </div>
+        <div class="footer">
+            <p>© 2024 IAT Technologies. All rights reserved.</p>
+            <p>To unsubscribe, click <a href="https://www.iattechnologies.com">here</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
+';
+
+try {
+    $stmt = $pdo->prepare("INSERT INTO campaigns (name, subject, body) VALUES (?, ?, ?)");
+    $stmt->execute([$campaignName, $campaignSubject, $campaignBody]);
+    $campaign_id = $pdo->lastInsertId();
+} catch (PDOException $e) {
+    die("Database error: " . $e->getMessage());
+}
+
+// MySQLi connection for fetching email recipients
+$conn = new mysqli('localhost', 'root', '', 'data_products');
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$email_sql = "SELECT email FROM contacts";
+$result = $conn->query($email_sql);
+
+if ($result->num_rows > 0) {
+    $recipients = [];
+    while ($row = $result->fetch_assoc()) {
+        $recipients[] = $row['email'];
+    }
+} else {
+    die("No recipients found.");
+}
+
+// Function to validate email format
+function validateEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+// Function to check if domain exists and has MX records
+function checkDomainMX($email) {
+    list($user, $domain) = explode('@', $email);
+    return checkdnsrr($domain, 'MX');
+}
+
+// Function to send email with HTML content
+function sendEmail($to, $subject, $body, $headers) {
+    return mail($to, $subject, $body, $headers);
+}
+
+// Set email headers
+$headers = 'From: admin@domain.com' . "\r\n" .
+    'Reply-To: info@domain.com' . "\r\n" .
+    'X-Mailer: PHP/' . phpversion() . "\r\n" .
+    'MIME-Version: 1.0' . "\r\n" .
+    'Content-Type: text/html; charset=UTF-8';
+
+// Prepare to check for duplicates
+$seen_emails = [];
+
+// Insert and check for duplicates
+foreach ($recipients as $email) {
+    $email = strtolower($email); // Convert email to lowercase
+
+    if (!validateEmail($email)) {
+        $description = "Invalid email format";
+        $stmt = $pdo->prepare("INSERT INTO recipients (campaign_id, email, status, description) VALUES (?, ?, 'failed', ?)");
+        $stmt->execute([$campaign_id, $email, $description]);
+        echo "Invalid email format for: $email<br>";
+        continue;
+    }
+
+    if (!checkDomainMX($email)) {
+        $description = "Domain does not exist or does not have MX records";
+        $stmt = $pdo->prepare("INSERT INTO recipients (campaign_id, email, status, description) VALUES (?, ?, 'failed', ?)");
+        $stmt->execute([$campaign_id, $email, $description]);
+        echo "Domain does not exist or does not have MX records for: $email<br>";
+        continue;
+    }
+
+    // Check if email is a duplicate
+    if (in_array($email, $seen_emails)) {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO recipients (campaign_id, email, status) VALUES (?, ?, 'duplicate')");
+            $stmt->execute([$campaign_id, $email]);
+            echo "Duplicate email found and marked: $email<br>";
+        } catch (PDOException $e) {
+            echo "Database error: " . $e->getMessage() . "<br>";
+        }
+        continue;
+    }
+
+    $seen_emails[] = $email;
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO recipients (campaign_id, email, status) VALUES (?, ?, 'pending')");
+        $stmt->execute([$campaign_id, $email]);
+        $recipient_id = $pdo->lastInsertId();
+
+        $tracking_key = uniqid('track_', true);
+        $stmt = $pdo->prepare("INSERT INTO email_tracking (recipient_id, tracking_key) VALUES (?, ?)");
+        $stmt->execute([$recipient_id, $tracking_key]);
+
+        $trackingBody = $campaignBody . '<img src="https://domain/track_open.php?tracking_key=' . $tracking_key . '" width="1" height="1" alt="" />';
+
+        if (sendEmail($email, $campaignSubject, $trackingBody, $headers)) {
+            $stmt = $pdo->prepare("UPDATE recipients SET status = 'sent', sent_at = NOW() WHERE id = ?");
+            $stmt->execute([$recipient_id]);
+            echo "Email sent to: $email<br>";
+        } else {
+            $stmt = $pdo->prepare("UPDATE recipients SET status = 'failed', description = ? WHERE id = ?");
+            $description = 'Failed to send email';
+            $stmt->execute([$description, $recipient_id]);
+            echo "Failed to send email to: $email<br>";
+        }
+    } catch (PDOException $e) {
+        echo "Database error: " . $e->getMessage() . "<br>";
+    }
+
+    // Delay to avoid being marked as spam
+    sleep(5);
+}
+
+header("Location:report.php");
+
+// Close the MySQLi and PDO connections
+$conn->close();
+$pdo = null;
+?>
